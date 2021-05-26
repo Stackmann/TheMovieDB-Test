@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    //@State private var movie: Movie
+    
     var body: some View {
         VStack(alignment: .leading) {
             Image("movie1-medium")
