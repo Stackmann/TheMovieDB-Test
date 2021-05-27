@@ -46,8 +46,10 @@ struct Movie: Hashable, Codable {
     }
 }
 
-struct MoviePop: Hashable, Codable {
-    var id: Int
+struct MoviePop: Hashable, Codable, Identifiable {
+    var id = UUID()
+    
+    var idMovie: Int
     var name: String
     var voteAverage: Double
     var posterPath: String
@@ -58,7 +60,7 @@ struct MoviePop: Hashable, Codable {
     var overview: String
     
     enum CodingKeys: String, CodingKey {
-        case id
+        case idMovie = "id"
         case name = "title"
         case voteAverage = "vote_average"
         case posterPath = "poster_path"
@@ -78,7 +80,7 @@ class Storage: ObservableObject {
             case .failure(let error): print(error.localizedDescription)
             case .success(let receivedMovies):
                 DispatchQueue.main.async {
-                    self.popularMovies = receivedMovies
+                    self.popularMovies += receivedMovies
                 }
             }
         }
