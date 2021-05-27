@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 struct Movie: Hashable, Codable {
     var id: Int
@@ -43,4 +44,45 @@ struct Movie: Hashable, Codable {
         case releaseDate = "release_date"
         case overview
     }
+}
+
+struct MoviePop: Hashable, Codable {
+    var id: Int
+    var name: String
+    var voteAverage: Double
+    var posterPath: String
+    var posterImage: Image {
+        Image("empty")
+    }
+    var genreIds: [Int]
+    var overview: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name = "title"
+        case voteAverage = "vote_average"
+        case posterPath = "poster_path"
+        case genreIds = "genre_ids"
+        case overview
+    }
+}
+
+class Storage: ObservableObject {
+    @Published var popularMovies: [MoviePop] = []
+    private var curentPage = 0
+
+    func loadPolular() {
+        curentPage += 1
+        TheMovieDB().getPopularMovies(with: curentPage) { result in
+            switch result {
+            case .failure(let error): print(error.localizedDescription)
+            case .success(let receivedMovies):
+                DispatchQueue.main.async {
+                    self.popularMovies = receivedMovies
+                }
+            }
+        }
+    }
+    
+    
 }
