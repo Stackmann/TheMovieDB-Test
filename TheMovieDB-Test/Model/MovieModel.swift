@@ -12,11 +12,11 @@ import Combine
 struct Movie: Hashable, Codable {
     var id: Int
     var name: String
-    var homePage: String
+    var homePage: String?
     var voteAverage: Double
-    private var posterName: String
+    private var posterName: String?
     var posterImage: Image {
-        Image(posterName)
+        Image("empty")
     }
     var rate: String {
         let starCount = Int(modf(voteAverage / 2).0)
@@ -28,10 +28,22 @@ struct Movie: Hashable, Codable {
         }
         return rate
     }
-    var genres: [String]
+    var genres: [Genre]
     var language: String
     var releaseDate: String
-    var overview: String
+    var overview: String?
+    
+    init(from moviePop: MoviePop) {
+        self.id = moviePop.idMovie
+        self.name = moviePop.name
+        self.homePage = ""
+        self.voteAverage = moviePop.voteAverage
+        self.posterName = moviePop.posterPath
+        self.genres = []
+        self.language = ""
+        self.releaseDate = ""
+        self.overview = moviePop.overview
+    }
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -43,6 +55,11 @@ struct Movie: Hashable, Codable {
         case language = "original_language"
         case releaseDate = "release_date"
         case overview
+    }
+    
+    struct Genre: Codable, Hashable {
+        var id: Int
+        var name: String
     }
 }
 
@@ -71,6 +88,7 @@ struct MoviePop: Hashable, Codable, Identifiable {
 
 class Storage: ObservableObject {
     @Published var popularMovies: [MoviePop] = []
+    
     private var curentPage = 0
 
     func loadPolular() {
@@ -85,6 +103,37 @@ class Storage: ObservableObject {
             }
         }
     }
+
+
+}
+
+class StorageMovie: ObservableObject {
+    @Published var state: MovieState = .isLoading
+    var movie: Movie!
+    let moviePop: MoviePop
+
+    enum MovieState {
+        case isLoading
+        case isError
+        case hasBeenLoaded
+    }
+
+    init(with moviePop: MoviePop) {
+        self.moviePop = moviePop
+    }
     
-    
+    func loadMovie() {
+        TheMovieDB().getMovie(with: self.moviePop.idMovie) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .failure(let error):
+                    self.state = .isError
+                    print(error.localizedDescription)
+                case .success(let receivedMovie):
+                    self.movie = receivedMovie
+                    self.state = .hasBeenLoaded
+                }
+            }
+        }
+    }
 }
