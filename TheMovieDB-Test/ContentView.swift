@@ -8,17 +8,21 @@
 import SwiftUI
 
 struct ContentView: View {
+    //@State private var movie: Movie
+    
     var body: some View {
         VStack(alignment: .leading) {
             Image("movie1-medium")
                 .resizable()
             Text("Movies name")
                 .padding(.bottom, -100)
+                .padding(.leading, 10)
                 .offset(y: -100)
                 .foregroundColor(.white)
                 .font(.title)
-            Text("Raiting")
+            Text("★★★")
                 .padding(.bottom, -60)
+                .padding(.leading, 10)
                 .offset(y: -60)
                 .foregroundColor(.white)
                 .font(.body)
