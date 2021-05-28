@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  MovieDetailView.swift
 //  TheMovieDB-Test
 //
 //  Created by admin on 25.05.2021.
@@ -7,14 +7,22 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    //@State private var movie: Movie
+struct MovieDetailView: View {
+//    var moviePop: MoviePop
+//    @State private var movie: Movie
+    @StateObject var viewModel = Storage()
+    
+    init(moviePop: MoviePop) {
+//        self.moviePop = moviePop
+//        _movie = State(wrappedValue: Movie(from: moviePop))
+        viewModel.loadMovie(with: moviePop)
+    }
     
     var body: some View {
         VStack(alignment: .leading) {
             Image("movie1-medium")
                 .resizable()
-            Text("Movies name")
+            Text(viewModel.movie.name)
                 .padding(.bottom, -100)
                 .padding(.leading, 10)
                 .offset(y: -100)
@@ -140,6 +148,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        MovieDetailView(moviePop: MoviePop(id: UUID(), idMovie: 0, name: "name", voteAverage: 3, posterPath: "", genreIds: [], overview: ""))
     }
 }
