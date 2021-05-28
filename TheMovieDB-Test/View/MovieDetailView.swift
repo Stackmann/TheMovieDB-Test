@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct MovieDetailView: View {
-//    var moviePop: MoviePop
-//    @State private var movie: Movie
     @ObservedObject var viewModel: StorageMovie
+    
+    let castRows: [GridItem] = [GridItem(.fixed(100))]
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -21,15 +21,11 @@ struct MovieDetailView: View {
                         VStack(alignment: .leading) {
                             Spacer()
                             Text(viewModel.movie.name)
-                                //.padding(.bottom, -100)
                                 .padding(.leading, 10)
-                                //.offset(y: -100)
                                 .foregroundColor(.white)
                                 .font(.title)
                             Text(viewModel.movie.rate)
-                                //.padding(.bottom, -60)
                                 .padding(.leading, 10)
-                                //.offset(y: -60)
                                 .foregroundColor(.white)
                                 .font(.body)
                         }
@@ -38,18 +34,15 @@ struct MovieDetailView: View {
                 } else {
                     Image("empty")
                         .resizable()
-                        //.frame(width: 400, height: 300)
                     HStack {
                         VStack(alignment: .leading) {
                             Spacer()
                             Text("Error loading")
                                 .padding(.leading, 10)
-                                //.offset(y: -100)
                                 .foregroundColor(.red)
                                 .font(.title)
                             Text("★")
                                 .padding(EdgeInsets(top: 0, leading: 10, bottom: 10, trailing: 0))
-                                //.offset(y: -60)
                                 .foregroundColor(.white)
                                 .font(.body)
                         }
@@ -150,50 +143,40 @@ struct MovieDetailView: View {
 
                         .foregroundColor(.primary)
                     ScrollView(.horizontal) {
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text("Tomb Raider")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Image("actor1")
-                                    .resizable()
-                                    .clipShape(/*@START_MENU_TOKEN@*/Circle()/*@END_MENU_TOKEN@*/)
-                                    .frame(width: 60, height: 60)
-                                Text("Angelina Jolie")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                        HStack(spacing: 20) {
+                            LazyHGrid(rows: castRows)  {
+                                ForEach(viewModel.cast, id: \.id) { cast in
+                                    VStack(alignment: .center) {
+                                        Text(cast.character)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        ImageFromURL(urlString: Constants.movieImagePath + (cast.imagePath ?? ""))
+                                            .clipShape(Circle())
+                                            .frame(width: 60, height: 60)
+                                        Text(cast.name)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
                             }
-                            Spacer()
-                            VStack(alignment: .leading) {
-                                Text("Genre")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Image("actor1")
-                                    .resizable()
-                                    .clipShape(/*@START_MENU_TOKEN@*/Circle()/*@END_MENU_TOKEN@*/)
-                                    .frame(width: 60, height: 60)
-                                Text("Romantic")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            VStack(alignment: .leading) {
-                                Text("Language")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Image("actor1")
-                                    .resizable()
-                                    .clipShape(/*@START_MENU_TOKEN@*/Circle()/*@END_MENU_TOKEN@*/)
-                                    .frame(width: 60, height: 60)
-                                Text("English")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
+                            
                         }
                         .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                        .onAppear { viewModel.loadCast() }
+                    }
+                    VStack(alignment: .leading) {
                         Text("Home page")
                             .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 0))
                             .foregroundColor(.primary)
+                        if viewModel.state == .hasBeenLoaded {
+                            Text(viewModel.movie.homePage ?? "")
+                                .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 0))
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("---")
+                                .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 0))
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }
             }

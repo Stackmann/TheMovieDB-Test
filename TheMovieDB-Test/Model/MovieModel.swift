@@ -86,6 +86,18 @@ struct MoviePop: Hashable, Codable, Identifiable {
     }
 }
 
+struct Cast: Hashable, Codable, Identifiable {
+    var id: Int
+    var name: String
+    var character: String
+    var imagePath: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, character
+        case imagePath = "profile_path"
+    }
+}
+
 class Storage: ObservableObject {
     @Published var popularMovies: [MoviePop] = []
     
@@ -103,14 +115,14 @@ class Storage: ObservableObject {
             }
         }
     }
-
-
 }
 
 class StorageMovie: ObservableObject {
     @Published var state: MovieState = .isLoading
+    @Published var castState: MovieState = .isLoading
     var movie: Movie!
     let moviePop: MoviePop
+    var cast: [Cast] = []
 
     enum MovieState {
         case isLoading
@@ -132,6 +144,21 @@ class StorageMovie: ObservableObject {
                 case .success(let receivedMovie):
                     self.movie = receivedMovie
                     self.state = .hasBeenLoaded
+                }
+            }
+        }
+    }
+
+    func loadCast() {
+        TheMovieDB().getCast(with: self.moviePop.idMovie) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .failure(let error):
+                    self.castState = .isError
+                    print(error.localizedDescription)
+                case .success(let receivedCast):
+                    self.cast = receivedCast
+                    self.castState = .hasBeenLoaded
                 }
             }
         }

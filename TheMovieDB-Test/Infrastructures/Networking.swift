@@ -85,6 +85,42 @@ class TheMovieDB: ObtainMovies {
 
     }
     
+    func getCast(with movieId: Int, completion: @escaping (Result<[Cast], Error>) -> Void) {
+        guard var urlComponents = URLComponents(string: Constants.movieDetailPath) else {
+            completion(.failure(NetworkError.cantCreateURL))
+            return
+        }
+        
+        urlComponents.path = urlComponents.path + "\(movieId)" + "/credits"
+        urlComponents.query = "api_key=\(Constants.apiKey)"
+
+        guard let url = urlComponents.url else {
+            completion(.failure(NetworkError.cantCreateURL))
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { (data, response, error) in
+            guard (response as? HTTPURLResponse) != nil else {
+                return
+            }
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                guard let data = data else {
+                    completion(.failure(NetworkError.cantRetriveData))
+                    return
+                }
+                do {
+                    let responseResult = try JSONDecoder().decode(CastResponse.self, from: data)
+                    completion(.success(responseResult.cast))
+                } catch {
+                    print(error)
+                    completion(.failure(error))
+                }
+            }
+        }.resume()
+    }
+
 
     enum NetworkError: Error {
         case cantCreateURL
@@ -103,5 +139,14 @@ struct Response: Codable {
         case totalResults = "total_results"
         case totalPages = "total_pages"
         case movies = "results"
+    }
+}
+
+struct CastResponse: Codable {
+    var id: Int
+    var cast: [Cast]
+    
+    enum CodingKeys: String, CodingKey {
+        case id, cast
     }
 }
