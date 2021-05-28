@@ -14,7 +14,7 @@ struct Movie: Hashable, Codable {
     var name: String
     var homePage: String?
     var voteAverage: Double
-    private var posterName: String?
+    var posterName: String?
     var posterImage: Image {
         Image("empty")
     }
