@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct MovieGridView: View {
-    //@State var popularMovies = [MoviePop]()
     @StateObject var viewModel = Storage()
     
     let columns: [GridItem] = [GridItem(.flexible()), GridItem(.flexible())]
