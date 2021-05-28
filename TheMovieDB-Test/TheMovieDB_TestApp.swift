@@ -11,7 +11,7 @@ import SwiftUI
 struct TheMovieDB_TestApp: App {
     var body: some Scene {
         WindowGroup {
-            MovieGridView()
+            HomeView()
         }
     }
 }
