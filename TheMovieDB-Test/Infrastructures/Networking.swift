@@ -9,7 +9,7 @@ import Foundation
 
 protocol ObtainMovies {
     func getPopularMovies(with page: Int, completion: @escaping (Result<[MoviePop], Error>) -> Void)
-    func getImageMovies(with movies: [MoviePop], completion: @escaping (Result<[MoviePop], Error>) -> Void)
+    func getMovie(with movieId: Int, completion: @escaping (Result<Movie, Error>) -> Void)
 }
 
 class TheMovieDB: ObtainMovies {
@@ -47,67 +47,44 @@ class TheMovieDB: ObtainMovies {
                 }
             }
         }.resume()
-        
     }
     
-    func getImageMovies(with movies: [MoviePop], completion: @escaping (Result<[MoviePop], Error>) -> Void) {
-//        guard var urlComponents = URLComponents(string: Constants.movieImagePath) else {
-//            completion(.failure(NetworkError.cantCreateURL))
-//            return
-//        }
-//        var arrayMovies = [MoviePop]()
-//        
-//        let syncQueue = DispatchQueue(label: "Queue to sync mutation")
-//        let group = DispatchGroup()
-//        for movie in movies {
-//            group.enter()
-//            
-//            urlComponents.path = urlComponents.path + "\(movie.posterPath)"
-//            
-//            guard let url = urlComponents.url else {
-//                syncQueue.sync {
-//                    arrayMovies.append(movie)
-//                }
-//                group.leave()
-//                continue
-//            }
-//            
-//            URLSession.shared.dataTask(with: url) { (data, response, error) in
-//                guard let response = response as? HTTPURLResponse else {
-//                    group.leave()
-//                    return
-//                }
-//                if let error = error {
-//                    syncQueue.sync {
-//                        arrayMovies.append(MoviePop(id: 1, name: "name", voteAverage: 0, posterPath: "", genreIds: [], overview: ""))
-//                    }
-//                } else {
-//                    guard let data = data else {
-//                        syncQueue.sync {
-//                            arrayMovies.append(MoviePop(id: 1, name: "name", voteAverage: 0, posterPath: "", genreIds: [], overview: ""))
-//                        }
-//                        return
-//                    }
-//                    do {
-//                        let weather = try JSONDecoder().decode(WeatherAnswer.self, from: data)
-//                        //syncQueue.sync {
-        //                        arrayMovies.append(MoviePop(id: 1, name: "name", voteAverage: 0, posterPath: "", genreIds: [], overview: ""))
-//                        //}
-//                    } catch {
-//                        syncQueue.sync {
-        //                        arrayMovies.append(MoviePop(id: 1, name: "name", voteAverage: 0, posterPath: "", genreIds: [], overview: ""))
-//                        }
-//                    }
-//                }
-//                
-//                group.leave()
-//            }.resume()
-//        }
-//        
-//        group.notify(queue: .global()) {
-//            completion(.success(arrayWeather))
-//        }
+    func getMovie(with movieId: Int, completion: @escaping (Result<Movie, Error>) -> Void) {
+        guard var urlComponents = URLComponents(string: Constants.movieDetailPath) else {
+            completion(.failure(NetworkError.cantCreateURL))
+            return
+        }
+        urlComponents.path = urlComponents.path + "\(movieId)"
+        urlComponents.query = "api_key=\(Constants.apiKey)"
+        
+        guard let url = urlComponents.url else {
+            completion(.failure(NetworkError.cantCreateURL))
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { (data, response, error) in
+            guard (response as? HTTPURLResponse) != nil else {
+                return
+            }
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                guard let data = data else {
+                    completion(.failure(NetworkError.cantRetriveData))
+                    return
+                }
+                do {
+                    let responseResult = try JSONDecoder().decode(Movie.self, from: data)
+                    completion(.success(responseResult))
+                } catch {
+                    print(error)
+                    completion(.failure(error))
+                }
+            }
+        }.resume()
+
     }
+    
 
     enum NetworkError: Error {
         case cantCreateURL
