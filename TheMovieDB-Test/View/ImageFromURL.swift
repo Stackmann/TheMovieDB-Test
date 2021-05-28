@@ -44,6 +44,7 @@ struct ImageFromURL: View {
         }
         attemptCount += 1
         guard attemptCount <= 5 else { return }
+        
         let task = URLSession.shared.downloadTask(with: url) { data, response, error in
             
             guard let data = data else { return }
