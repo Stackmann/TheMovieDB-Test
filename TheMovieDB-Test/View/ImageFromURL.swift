@@ -11,11 +11,11 @@ struct ImageFromURL: View {
     
     let urlString: String
     @State private var image: UIImage? = nil
+    @State private var attemptCount = 0
     private var url: URL? {
         return URL(string: urlString)
     }
     var cache: ImageCache = Environment(\.imageCache).wrappedValue
-    var attemptCount = 0
     
     var body: some View {
         
@@ -42,7 +42,8 @@ struct ImageFromURL: View {
             self.image = image
             return
         }
-        
+        attemptCount += 1
+        guard attemptCount <= 5 else { return }
         let task = URLSession.shared.downloadTask(with: url) { data, response, error in
             
             guard let data = data else { return }

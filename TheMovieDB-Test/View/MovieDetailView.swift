@@ -10,30 +10,51 @@ import SwiftUI
 struct MovieDetailView: View {
 //    var moviePop: MoviePop
 //    @State private var movie: Movie
-    @StateObject var viewModel = Storage()
-    
-    init(moviePop: MoviePop) {
-//        self.moviePop = moviePop
-//        _movie = State(wrappedValue: Movie(from: moviePop))
-        viewModel.loadMovie(with: moviePop)
-    }
+    @ObservedObject var viewModel: StorageMovie
     
     var body: some View {
         VStack(alignment: .leading) {
-            Image("movie1-medium")
-                .resizable()
-            Text(viewModel.movie.name)
-                .padding(.bottom, -100)
-                .padding(.leading, 10)
-                .offset(y: -100)
-                .foregroundColor(.white)
-                .font(.title)
-            Text("★★★")
-                .padding(.bottom, -60)
-                .padding(.leading, 10)
-                .offset(y: -60)
-                .foregroundColor(.white)
-                .font(.body)
+            ZStack {
+                if viewModel.state == .hasBeenLoaded {
+                    Image("movie1-medium")
+                        .resizable()
+                    VStack(alignment: .leading) {
+                        Spacer()
+                        Text(viewModel.movie.name)
+                            //.padding(.bottom, -100)
+                            .padding(.leading, 10)
+                            //.offset(y: -100)
+                            .foregroundColor(.white)
+                            .font(.title)
+                        Text("★★★")
+                            //.padding(.bottom, -60)
+                            .padding(.leading, 10)
+                            //.offset(y: -60)
+                            .foregroundColor(.white)
+                            .font(.body)
+                    }
+                } else {
+                    Image("empty")
+                        .resizable()
+                        //.frame(width: 400, height: 300)
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Spacer()
+                            Text("Error loading")
+                                .padding(.leading, 10)
+                                //.offset(y: -100)
+                                .foregroundColor(.red)
+                                .font(.title)
+                            Text("★★★")
+                                .padding(EdgeInsets(top: 0, leading: 10, bottom: 10, trailing: 0))
+                                //.offset(y: -60)
+                                .foregroundColor(.white)
+                                .font(.body)
+                        }
+                        Spacer()
+                    }
+                }
+            }
             HStack {
                 Spacer()
                 Image("play button orange")
@@ -142,12 +163,13 @@ struct MovieDetailView: View {
             }
 //            }
         }
+        .onAppear { viewModel.loadMovie()}
         .ignoresSafeArea(edges: .all)
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        MovieDetailView(moviePop: MoviePop(id: UUID(), idMovie: 0, name: "name", voteAverage: 3, posterPath: "", genreIds: [], overview: ""))
+        MovieDetailView(viewModel: StorageMovie(with: MoviePop(id: UUID(), idMovie: 0, name: "name", voteAverage: 3, posterPath: "", genreIds: [], overview: "")))
     }
 }

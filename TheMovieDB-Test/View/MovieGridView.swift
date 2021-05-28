@@ -18,7 +18,10 @@ struct MovieGridView: View {
             ScrollView {
                 LazyVGrid(columns: columns){
                     ForEach(viewModel.popularMovies, id: \.id) { movie in
-                        MovieTitleView(movie: movie)
+                        NavigationLink(
+                            destination: MovieDetailView(viewModel: StorageMovie(with: movie))) {
+                            MovieTitleView(movie: movie)
+                        }
                     }
                     Text("Load more...")
                         .onAppear { loadData() }
